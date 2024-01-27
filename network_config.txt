@@ -1,2 +1,0 @@
-# Sample network_config.txt
-sudo systemctl restart network-manager
