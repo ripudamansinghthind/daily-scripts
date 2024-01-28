@@ -1,25 +1,25 @@
-#!/bin/bash
-
-wifi_interface="wlp60s0"
-target_host="8.8.8.8"
-network_manager_service="NetworkManager"
-log_file="./wifi_check.log"
-
-wifi_status=""
+#!/usr/bin/env bash
+log_file="/opt/scripts/wifi_check.log"
 
 while true; do
-    if ping -c 1 $target_host >/dev/null 2>&1; then
-        if [ "$wifi_status" != "up" ]; then
-            echo "$(date): WiFi is up." >> $log_file
-            wifi_status="up"
+     if ! ping -c 1 google.com > /dev/null 2>&1; then
+        echo "$(date): WiFi is down. Reconnecting..."
+
+        nmcli device disconnect wlp60s0
+        nmcli device wifi connect "ssid_name" password "ssid_password"
+
+        # Log the reconnection status
+        if ping -c 1 example.com > /dev/null 2>&1; then
+            echo "$(date): Reconnected to WiFi." >> "$log_file"
+        else
+            echo "$(date): Failed to reconnect to WiFi." >> "$log_file"
         fi
     else
-        if [ "$wifi_status" != "down" ]; then
-            echo "$(date): WiFi is down. Reconnecting..." >> $log_file
-            sudo service $network_manager_service restart           
-            wifi_status="down"
-        fi
+        # WiFi is up, log that it's up
+        echo "$(date): WiFi is up." >> "$log_file"
     fi
 
+    # Sleep for 3 minutes
     sleep 180
 done
+
